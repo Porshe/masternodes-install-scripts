@@ -26,12 +26,13 @@ NODE_IDX=$4
 NODE_FOLDER="/masternodes/node_${NODE_IDX}"
 NODE_FOLDER_DATA="${NODE_FOLDER}/data"
 
-NODE_RPCPORT=get_node_rpcport
+NODE_RPCPORT=$(get_node_rpcport)
 NODE_RPCUSER=
 NODE_RPCPASSWORD=
 
 #include coin config
 source ${CURRENT_FOLDER}/coins-configs/${COIN}.sh
+
 
 
 clear

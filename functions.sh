@@ -125,19 +125,29 @@ function compile_node() {
 }
 
 function get_node_rpcport(){
-    return 60000+${NODE_IDX}
+    echo $((60000 + ${NODE_IDX}))
 }
 function create_config() {
-  NODE_RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
-  NODE_RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
-  cat << EOF > $NODE_FOLDER_DATA/$CONFIG_FILE
+
+    if [[ ${#NODE_IP} > 16 ]];
+    then
+        _RPC_BIND="[$NODE_IP]:$NODE_RPCPORT"
+        _BIND="[$NODE_IP]:$COIN_PORT"
+    else
+        _RPC_BIND="$NODE_IP:$NODE_RPCPORT"
+        _BIND="$NODE_IP:$COIN_PORT"
+    fi
+
+    NODE_RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
+    NODE_RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
+    cat << EOF > $NODE_FOLDER_DATA/$CONFIG_FILE
 rpcuser=$NODE_RPCUSER
 rpcpassword=$NODE_RPCPASSWORD
 rpcallowip=10.7.96.0/24
 #my Indonesion IP subnet for test
 rpcallowip=175.158.49.0/24
 rpcport=$NODE_RPCPORT
-rpcbind=$NODE_IP:$NODE_RPCPORT
+rpcbind=$_RPC_BIND
 listen=1
 server=1
 daemon=1
@@ -147,8 +157,8 @@ logintimestamps=1
 maxconnections=500
 
 port=$COIN_PORT
-bind=$NODE_IP:$COIN_PORT
-externalip=$NODE_IP:$COIN_PORT
+bind=$_BIND
+externalip=$_BIND
 masternodeprivkey=$PRIV_KEY
 EOF
 }
@@ -162,18 +172,24 @@ function enable_firewall() {
 }
 
 function important_information() {
+    COIN_SERVICE=node_$NODE_IDX.service
     echo
     echo -e "================================================================================"
     echo -e "$COIN Masternode is up and running listening on port ${RED}$COIN_PORT${NC}."
     echo -e "Configuration file is: ${RED}$NODE_FOLDER_DATA/$CONFIG_FILE${NC}"
+
+    echo -e "RPC_PORT: ${RED}$NODE_RPCPORT${NC}"
+    echo -e "RPC_USER: ${RED}$NODE_RPCUSER${NC}"
+    echo -e "RPC_PASSWORD: ${RED}$NODE_RPCPASSWORD${NC}"
+
     if (( $UBUNTU_VERSION == 16 )); then
-        echo -e "Start: ${RED}systemctl start $COIN.service${NC}"
-        echo -e "Stop: ${RED}systemctl stop $COIN.service${NC}"
-        echo -e "Status: ${RED}systemctl status $COIN.service${NC}"
+        echo -e "Start: ${RED}systemctl start $COIN_SERVICE${NC}"
+        echo -e "Stop: ${RED}systemctl stop $COIN_SERVICE${NC}"
+        echo -e "Status: ${RED}systemctl status $COIN_SERVICE${NC}"
     else
-        echo -e "Start: ${RED}/etc/init.d/$COIN start${NC}"
-        echo -e "Stop: ${RED}/etc/init.d/$COIN stop${NC}"
-        echo -e "Status: ${RED}/etc/init.d/$COIN status${NC}"
+        echo -e "Start: ${RED}/etc/init.d/$COIN_SERVICE start${NC}"
+        echo -e "Stop: ${RED}/etc/init.d/$COIN_SERVICE stop${NC}"
+        echo -e "Status: ${RED}/etc/init.d/$COIN_SERVICE status${NC}"
     fi
     echo -e "VPS_IP:PORT ${RED}$NODE_IP:$COIN_PORT${NC}"
     echo -e "MASTERNODE PRIVATEKEY is: ${RED}$PRIV_KEY${NC}"
@@ -200,7 +216,7 @@ Type=forking
 #PIDFile=$NODE_FOLDER_DATA/$COIN.pid
 
 ExecStart=$COIN_DAEMON -daemon -conf=$NODE_FOLDER_DATA/$CONFIG_FILE -datadir=$NODE_FOLDER_DATA
-ExecStop=-$COIN_CLI -conf=$NODE_FOLDER_DATA/$CONFIG_FILE -datadir=$NODE_FOLDER_DATA stop
+ExecStop=$COIN_CLI -conf=$NODE_FOLDER_DATA/$CONFIG_FILE -datadir=$NODE_FOLDER_DATA stop
 
 Restart=always
 PrivateTmp=true

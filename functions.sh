@@ -33,6 +33,12 @@ check_script_params(){
        return 0
     fi
 
+    #check for NODE_RPCIP params
+    if [[ -z "$5" ]]; then
+       echo_error "Masternode NODE RPCIP param not set"
+       return 0
+    fi
+
     return 1
 }
 
@@ -115,7 +121,8 @@ function compile_node() {
     TMP_FOLDER=$(mktemp -d)
     echo -e "Temp Folder: ${TMP_FOLDER}"
     cd $TMP_FOLDER
-    wget --progress=bar:force $COIN_REPO 2>&1 | progressfilt
+#    wget --progress=bar:force $COIN_REPO 2>&1 | progressfilt
+    wget --progress=bar:force $COIN_REPO 2>&1
     tar xvzf $COIN_ZIP
     rm -f $COIN_ZIP >/dev/null 2>&1
     cp * ${NODE_FOLDER}
@@ -129,12 +136,17 @@ function get_node_rpcport(){
 }
 function create_config() {
 
+
+    if [[ ${#NODE_RPCIP} > 16 ]];
+    then
+        _RPC_BIND="[$NODE_RPCIP]:$NODE_RPCPORT"
+    else
+        _RPC_BIND="$NODE_RPCIP:$NODE_RPCPORT"
+    fi
     if [[ ${#NODE_IP} > 16 ]];
     then
-        _RPC_BIND="[$NODE_IP]:$NODE_RPCPORT"
         _BIND="[$NODE_IP]:$COIN_PORT"
     else
-        _RPC_BIND="$NODE_IP:$NODE_RPCPORT"
         _BIND="$NODE_IP:$COIN_PORT"
     fi
 

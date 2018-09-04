@@ -15,7 +15,7 @@ echo -e "${GREEN}Current folder:${NC} ${CURRENT_FOLDER}"
 #include all functions
 source ./functions.sh
 
-if check_script_params $1 $2 $3 $4; then
+if check_script_params $1 $2 $3 $4 $5; then
    exit 1
 fi
 
@@ -26,6 +26,7 @@ NODE_IDX=$4
 NODE_FOLDER="/masternodes/node_${NODE_IDX}"
 NODE_FOLDER_DATA="${NODE_FOLDER}/data"
 
+NODE_RPCIP=$5
 NODE_RPCPORT=$(get_node_rpcport)
 NODE_RPCUSER=
 NODE_RPCPASSWORD=
@@ -42,6 +43,7 @@ echo -e "${GREEN}Masternode NODE IP:${NC} ${NODE_IP}"
 echo -e "${GREEN}Masternode NODE IDX:${NC} ${NODE_IDX}"
 echo -e "${GREEN}Masternode NODE FOLDER:${NC} ${NODE_FOLDER}"
 echo -e "${GREEN}Masternode NODE DATA FOLDER:${NC} ${NODE_FOLDER_DATA}"
+echo -e "${GREEN}Masternode NODE RPCIP:${NC} ${NODE_RPCIP}"
 echo -e "${GREEN}Masternode NODE RPCPORT:${NC} ${NODE_RPCPORT}"
 
 

@@ -47,6 +47,13 @@ echo -e "${GREEN}Masternode NODE RPCIP:${NC} ${NODE_RPCIP}"
 echo -e "${GREEN}Masternode NODE RPCPORT:${NC} ${NODE_RPCPORT}"
 
 
+if [ ! "$(ps -ef | grep ${NODE_FOLDER} | grep -v grep)" -ge 1 ]
+then
+    echo_error "Node with index ${NODE_IDX} already deployed."
+    exit 1
+fi
+
+
 check_system
 prepare_system
 prepare_node_folder

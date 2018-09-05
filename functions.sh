@@ -189,7 +189,7 @@ daemon=1
 masternode=1
 
 logintimestamps=1
-maxconnections=500
+maxconnections=100
 
 port=$COIN_PORT
 bind=$_BIND
@@ -212,14 +212,26 @@ server=1
 daemon=1
 masternode=0
 
+txindex=1
+addressindex=1
+
 logintimestamps=1
-maxconnections=500
+maxconnections=50
 
 port=$COIN_PORT
 bind=$COIN_IP:$COIN_PORT
 EOF
 }
 
+function create_wallet_cli_scripts() {
+    cat << EOF > $COIN_FOLDER/wallet-cli.sh
+#!/bin/bash
+
+$COIN_CLI -conf=$COIN_FOLDER_DATA/$CONFIG_FILE -datadir=$COIN_FOLDER_DATA "$@"
+EOF
+}
+
+}
 function enable_firewall() {
   echo -e "Installing and setting up firewall to allow ingress on port ${GREEN}$COIN_PORT${NC}"
   ufw allow ssh >/dev/null 2>&1
@@ -344,6 +356,7 @@ EOF
 
 function setup_node() {
     create_node_config
+    create_wallet_cli_scripts
     enable_firewall
 
     important_information
@@ -357,6 +370,7 @@ function setup_node() {
 
 function setup_wallet() {
     create_wallet_config
+    create_wallet_cli_scripts
 
     important_information
     if (( $UBUNTU_VERSION == 16 )); then

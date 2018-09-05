@@ -15,20 +15,18 @@ echo -e "${GREEN}Current folder:${NC} ${CURRENT_FOLDER}"
 #include all functions
 source ./functions.sh
 
-if check_script_params $1 $2 $3 $4 $5; then
+if check_wallet_script_params $1 $2; then
    exit 1
 fi
 
 COIN=$1
-PRIV_KEY=$2
-COIN_IP=$3
-NODE_IDX=$4
-COIN_FOLDER="/masternodes/node_${NODE_IDX}"
+COIN_IP="127.0.0.1"
+COIN_FOLDER="/wallets/${COIN}"
 COIN_FOLDER_DATA="${COIN_FOLDER}/data"
-COIN_SERVICE=node_$NODE_IDX.service
+COIN_SERVICE=wallet_$COIN.service
 
-COIN_RPCIP=$5
-COIN_RPCPORT=$(get_node_rpcport)
+COIN_RPCIP="127.0.0.1"
+COIN_RPCPORT=$2
 COIN_RPCUSER=
 COIN_RPCPASSWORD=
 
@@ -39,18 +37,16 @@ source ${CURRENT_FOLDER}/coins-configs/${COIN}.sh
 
 clear
 echo -e "${GREEN}Coin:${NC} ${COIN}"
-echo -e "${GREEN}Masternode private key:${NC} ${PRIV_KEY}"
-echo -e "${GREEN}Masternode NODE IP:${NC} ${COIN_IP}"
-echo -e "${GREEN}Masternode NODE IDX:${NC} ${NODE_IDX}"
-echo -e "${GREEN}Masternode NODE FOLDER:${NC} ${COIN_FOLDER}"
-echo -e "${GREEN}Masternode NODE DATA FOLDER:${NC} ${COIN_FOLDER_DATA}"
-echo -e "${GREEN}Masternode NODE RPCIP:${NC} ${COIN_RPCIP}"
-echo -e "${GREEN}Masternode NODE RPCPORT:${NC} ${COIN_RPCPORT}"
+echo -e "${GREEN}Wallet IP:${NC} ${COIN_IP}"
+echo -e "${GREEN}Wallet FOLDER:${NC} ${COIN_FOLDER}"
+echo -e "${GREEN}Wallet DATA FOLDER:${NC} ${COIN_FOLDER_DATA}"
+echo -e "${GREEN}Wallet RPCIP:${NC} ${COIN_RPCIP}"
+echo -e "${GREEN}Wallet RPCPORT:${NC} ${COIN_RPCPORT}"
 
 
 if [ "$( ps -ef | grep -v grep | grep -c ${COIN_FOLDER} )" -ge 1 ]
 then
-    echo_error "Node with index ${NODE_IDX} already deployed."
+    echo_error "Wallet with ${COIN} already deployed."
     exit 1
 fi
 
@@ -59,6 +55,6 @@ check_system
 prepare_system
 prepare_coin_folder
 compile_coin
-setup_node
+setup_wallet
 
 exit 0

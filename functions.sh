@@ -33,9 +33,30 @@ check_script_params(){
        return 0
     fi
 
-    #check for NODE_RPCIP params
+    #check for COIN_RPCIP params
     if [[ -z "$5" ]]; then
        echo_error "Masternode NODE RPCIP param not set"
+       return 0
+    fi
+
+    return 1
+}
+
+check_wallet_script_params(){
+    #check for coin params
+    if [[ -z "$1" ]]; then
+       echo_error "COIN param not set"
+       return 0
+    fi
+    if [ ! -f "${CURRENT_FOLDER}/coins-configs/$1.sh" ]
+    then
+        echo_error "Config for coin \"$1\" not found"
+        return 0
+    fi
+
+    #check for rpcport params
+    if [[ -z "$2" ]]; then
+       echo_error "COIN_RPCPORT param not set"
        return 0
     fi
 
@@ -73,15 +94,17 @@ function prepare_system() {
     apt-get install -y binutils >/dev/null 2>&1
 }
 
-function prepare_node_folder() {
-    if [ -f "${NODE_FOLDER}" ]
+#$1 - wallet|node folder
+#$2 - wallet|node data folder
+function prepare_coin_folder() {
+    if [ -f "$COIN_FOLDER" ]
     then
-        rm -f "${NODE_FOLDER}/*"
+        rm -f "$COIN_FOLDER/*"
     fi
 
-    if [ ! -f "${NODE_FOLDER_DATA}" ]
+    if [ ! -f "$COIN_FOLDER_DATA" ]
     then
-        mkdir -p ${NODE_FOLDER_DATA}
+        mkdir -p $COIN_FOLDER_DATA
         echo -e "${GREEN}Masternode foldder created:${NC}"
     fi
 }
@@ -116,7 +139,7 @@ function compile_error() {
     fi
 }
 
-function compile_node() {
+function compile_coin() {
     echo -e "Prepare to download $COIN"
     TMP_FOLDER=$(mktemp -d)
     echo -e "Temp Folder: ${TMP_FOLDER}"
@@ -125,40 +148,40 @@ function compile_node() {
     wget --progress=bar:force $COIN_REPO 2>&1
     tar xvzf $COIN_ZIP
     rm -f $COIN_ZIP >/dev/null 2>&1
-    cp * ${NODE_FOLDER}
+    cp * $COIN_FOLDER
     compile_error
-    cd ${NODE_FOLDER}
+    cd $COIN_FOLDER
     rm -rf $TMP_FOLDER >/dev/null 2>&1
 }
 
 function get_node_rpcport(){
     echo $((60000 + ${NODE_IDX}))
 }
-function create_config() {
+function create_node_config() {
 
-
-    if [[ ${#NODE_RPCIP} > 16 ]];
+    if [[ ${#COIN_RPCIP} > 16 ]];
     then
-        _RPC_BIND="[$NODE_RPCIP]:$NODE_RPCPORT"
+        _RPC_BIND="[$COIN_RPCIP]:$COIN_RPCPORT"
     else
-        _RPC_BIND="$NODE_RPCIP:$NODE_RPCPORT"
+        _RPC_BIND="$COIN_RPCIP:$COIN_RPCPORT"
     fi
-    if [[ ${#NODE_IP} > 16 ]];
+    if [[ ${#COIN_IP} > 16 ]];
     then
-        _BIND="[$NODE_IP]:$COIN_PORT"
+        _BIND="[$COIN_IP]:$COIN_PORT"
     else
-        _BIND="$NODE_IP:$COIN_PORT"
+        _BIND="$COIN_IP:$COIN_PORT"
     fi
 
-    NODE_RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
-    NODE_RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
-    cat << EOF > $NODE_FOLDER_DATA/$CONFIG_FILE
-rpcuser=$NODE_RPCUSER
-rpcpassword=$NODE_RPCPASSWORD
+    COIN_RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
+    COIN_RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
+    cat << EOF > $COIN_FOLDER_DATA/$CONFIG_FILE
+rpcuser=$COIN_RPCUSER
+rpcpassword=$COIN_RPCPASSWORD
+rpcallowip=127.0.0.1
 rpcallowip=10.7.96.0/24
 #my Indonesion IP subnet for test
 rpcallowip=175.158.49.0/24
-rpcport=$NODE_RPCPORT
+rpcport=$COIN_RPCPORT
 rpcbind=$_RPC_BIND
 listen=1
 server=1
@@ -175,6 +198,28 @@ masternodeprivkey=$PRIV_KEY
 EOF
 }
 
+function create_wallet_config() {
+    COIN_RPCUSER=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w10 | head -n1)
+    COIN_RPCPASSWORD=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w22 | head -n1)
+    cat << EOF > $COIN_FOLDER_DATA/$CONFIG_FILE
+rpcuser=$COIN_RPCUSER
+rpcpassword=$COIN_RPCPASSWORD
+rpcallowip=127.0.0.1
+rpcport=$COIN_RPCPORT
+rpcbind=$COIN_RPCIP
+listen=1
+server=1
+daemon=1
+masternode=0
+
+logintimestamps=1
+maxconnections=500
+
+port=$COIN_PORT
+bind=$COIN_IP:$COIN_PORT
+EOF
+}
+
 function enable_firewall() {
   echo -e "Installing and setting up firewall to allow ingress on port ${GREEN}$COIN_PORT${NC}"
   ufw allow ssh >/dev/null 2>&1
@@ -184,15 +229,14 @@ function enable_firewall() {
 }
 
 function important_information() {
-    COIN_SERVICE=node_$NODE_IDX.service
     echo
     echo -e "================================================================================"
     echo -e "$COIN Masternode is up and running listening on port ${RED}$COIN_PORT${NC}."
-    echo -e "Configuration file is: ${RED}$NODE_FOLDER_DATA/$CONFIG_FILE${NC}"
+    echo -e "Configuration file is: ${RED}$COIN_FOLDER_DATA/$CONFIG_FILE${NC}"
 
-    echo -e "RPC_PORT: ${RED}$NODE_RPCPORT${NC}"
-    echo -e "RPC_USER: ${RED}$NODE_RPCUSER${NC}"
-    echo -e "RPC_PASSWORD: ${RED}$NODE_RPCPASSWORD${NC}"
+    echo -e "RPC_PORT: ${RED}$COIN_RPCPORT${NC}"
+    echo -e "RPC_USER: ${RED}$COIN_RPCUSER${NC}"
+    echo -e "RPC_PASSWORD: ${RED}$COIN_RPCPASSWORD${NC}"
 
     if (( $UBUNTU_VERSION == 16 )); then
         echo -e "Start: ${RED}systemctl start $COIN_SERVICE${NC}"
@@ -203,21 +247,20 @@ function important_information() {
         echo -e "Stop: ${RED}/etc/init.d/$COIN_SERVICE stop${NC}"
         echo -e "Status: ${RED}/etc/init.d/$COIN_SERVICE status${NC}"
     fi
-    echo -e "VPS_IP:PORT ${RED}$NODE_IP:$COIN_PORT${NC}"
+    echo -e "VPS_IP:PORT ${RED}$COIN_IP:$COIN_PORT${NC}"
     echo -e "MASTERNODE PRIVATEKEY is: ${RED}$PRIV_KEY${NC}"
     if [[ -n $SENTINEL_REPO  ]]; then
-        echo -e "${RED}Sentinel${NC} is installed in ${RED}$NODE_FOLDER_DATA/sentinel${NC}"
-        echo -e "Sentinel logs is: ${RED}$NODE_FOLDER_DATA/sentinel.log${NC}"
+        echo -e "${RED}Sentinel${NC} is installed in ${RED}$COIN_FOLDER_DATA/sentinel${NC}"
+        echo -e "Sentinel logs is: ${RED}$COIN_FOLDER_DATA/sentinel.log${NC}"
     fi
     echo -e "Check if $COIN is running by using the following command:\n${RED}ps -ef | grep $COIN_DAEMON | grep -v grep${NC}"
     echo -e "================================================================================"
 }
 
 function configure_systemd() {
-    COIN_SERVICE=node_$NODE_IDX.service
     cat << EOF > /etc/systemd/system/$COIN_SERVICE
 [Unit]
-Description=Node $NODE_IDX: $COIN service
+Description=$COIN_SERVICE service
 After=network.target
 
 [Service]
@@ -225,10 +268,10 @@ User=root
 Group=root
 
 Type=forking
-#PIDFile=$NODE_FOLDER_DATA/$COIN.pid
+#PIDFile=$COIN_FOLDER_DATA/$COIN.pid
 
-ExecStart=$COIN_DAEMON -daemon -conf=$NODE_FOLDER_DATA/$CONFIG_FILE -datadir=$NODE_FOLDER_DATA
-ExecStop=$COIN_CLI -conf=$NODE_FOLDER_DATA/$CONFIG_FILE -datadir=$NODE_FOLDER_DATA stop
+ExecStart=$COIN_DAEMON -daemon -conf=$COIN_FOLDER_DATA/$CONFIG_FILE -datadir=$COIN_FOLDER_DATA
+ExecStop=$COIN_CLI -conf=$COIN_FOLDER_DATA/$CONFIG_FILE -datadir=$COIN_FOLDER_DATA stop
 
 Restart=always
 PrivateTmp=true
@@ -257,7 +300,6 @@ EOF
 
 
 function configure_startup() {
-    COIN_SERVICE=node_$NODE_IDX.service
     cat << EOF > /etc/init.d/$COIN_SERVICE
 #! /bin/bash
 ### BEGIN INIT INFO
@@ -266,8 +308,8 @@ function configure_startup() {
 # Required-Stop: $remote_fs $syslog
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
-# Short-Description: Node $NODE_IDX: $COIN
-# Description: This file starts and stops Node $NODE_IDX: $COIN MN server
+# Short-Description: $COIN: $COIN_SERVICE
+# Description: This file starts and stops $COIN: $COIN_SERVICE MN server
 #
 ### END INIT INFO
 
@@ -301,8 +343,20 @@ EOF
 
 
 function setup_node() {
-    create_config
+    create_node_config
     enable_firewall
+
+    important_information
+    if (( $UBUNTU_VERSION == 16 )); then
+        configure_systemd
+    else
+        configure_startup
+    fi
+}
+
+
+function setup_wallet() {
+    create_wallet_config
 
     important_information
     if (( $UBUNTU_VERSION == 16 )); then

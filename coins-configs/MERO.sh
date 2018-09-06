@@ -16,7 +16,14 @@ function coin_custom_comile() {
     cd ./mero-1.0.1
     ./autogen.sh
     ./configure --disable-tests --disable-gui-tests
+
     make
+    if [ "$?" -gt "0" ];
+    then
+        echo_error "Failed to make $COIN. Please investigate."
+        exit 1
+    fi
+
     cd src
     strip merod
     strip mero-cli

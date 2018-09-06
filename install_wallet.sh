@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #format
-#. install.sh COIN RPCPORT
-#. install.sh GOA 10000
+#. install_wallet.sh COIN RPCPORT
+#. install_wallet.sh GOA 10000
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

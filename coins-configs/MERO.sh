@@ -9,13 +9,13 @@ COIN_CLI="${COIN_FOLDER}/mero-cli"
 
 function coin_custom_comile() {
     add-apt-repository ppa:bitcoin/bitcoin -y
-    apt-get update
-    apt-get install -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils
-    apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev
-    apt-get install -y libdb4.8-dev libdb4.8++-dev
+    apt-get update >/dev/null 2>&1
+    apt-get install -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils >/dev/null 2>&1
+    apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev >/dev/null 2>&1
+    apt-get install -y libdb4.8-dev libdb4.8++-dev >/dev/null 2>&1
     cd ./mero-1.0.1
-    ./autogen.sh
-    ./configure --disable-tests --disable-gui-tests
+    ./autogen.sh >/dev/null 2>&1
+    ./configure --disable-tests --disable-gui-tests >/dev/null 2>&1
 
     make
     if [ "$?" -gt "0" ];

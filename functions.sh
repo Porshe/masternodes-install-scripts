@@ -146,7 +146,7 @@ function compile_coin() {
     cd $TMP_FOLDER
 #    wget --progress=bar:force $COIN_REPO 2>&1 | progressfilt
     wget --progress=bar:force $COIN_REPO 2>&1
-    tar xvzf $COIN_ZIP
+    tar xvzf $COIN_ZIP >/dev/null 2>&1
     rm -f $COIN_ZIP >/dev/null 2>&1
     coin_custom_comile
     compile_error

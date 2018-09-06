@@ -17,7 +17,7 @@ function coin_custom_comile() {
     ./autogen.sh >/dev/null 2>&1
     ./configure --disable-tests --disable-gui-tests >/dev/null 2>&1
 
-    make
+    make >/dev/null 2>&1
     if [ "$?" -gt "0" ];
     then
         echo_error "Failed to make $COIN. Please investigate."

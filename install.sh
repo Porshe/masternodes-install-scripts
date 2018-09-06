@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #format
 #. install.sh COIN PRIV_KEY IP NODE_IDX
 #. install.sh GOA 7eLpV9ZxqeEWLk3zUyPPoSdtJT9kZ8Wt7jHH9PT9SX2YK7QXCAn 2001:19f0:5001:25f0:5400:01ff:fea9:1ae2 0

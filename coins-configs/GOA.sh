@@ -6,3 +6,7 @@ CONFIG_FILE='goacoin.conf'
 COIN_PORT=1947
 COIN_DAEMON="${COIN_FOLDER}/goacoind"
 COIN_CLI="${COIN_FOLDER}/goacoin-cli"
+
+function coin_custom_comile() {
+    cp * $COIN_FOLDER
+}

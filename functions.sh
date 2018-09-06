@@ -229,6 +229,7 @@ function create_wallet_cli_scripts() {
 
 $COIN_CLI -conf=$COIN_FOLDER_DATA/$CONFIG_FILE -datadir=$COIN_FOLDER_DATA "$@"
 EOF
+    chmod +x $COIN_FOLDER/wallet-cli.sh
 }
 
 }

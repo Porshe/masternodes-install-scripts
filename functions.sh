@@ -232,7 +232,6 @@ EOF
     chmod +x $COIN_FOLDER/wallet-cli.sh
 }
 
-}
 function enable_firewall() {
   echo -e "Installing and setting up firewall to allow ingress on port ${GREEN}$COIN_PORT${NC}"
   ufw allow ssh >/dev/null 2>&1

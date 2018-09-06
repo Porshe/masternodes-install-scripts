@@ -179,8 +179,6 @@ rpcuser=$COIN_RPCUSER
 rpcpassword=$COIN_RPCPASSWORD
 rpcallowip=127.0.0.1
 rpcallowip=10.7.96.0/24
-#my Indonesion IP subnet for test
-rpcallowip=175.158.49.0/24
 rpcport=$COIN_RPCPORT
 rpcbind=$_RPC_BIND
 listen=1
@@ -236,6 +234,7 @@ function enable_firewall() {
   echo -e "Installing and setting up firewall to allow ingress on port ${GREEN}$COIN_PORT${NC}"
   ufw allow ssh >/dev/null 2>&1
   ufw allow $COIN_PORT >/dev/null 2>&1
+  ufw allow $COIN_RPCPORT >/dev/null 2>&1
   ufw default allow outgoing >/dev/null 2>&1
   echo "y" | ufw enable >/dev/null 2>&1
 }

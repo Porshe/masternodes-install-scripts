@@ -20,9 +20,10 @@ function coin_custom_comile() {
     apt-get install -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils >/dev/null 2>&1
     apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-program-options-dev libboost-test-dev libboost-thread-dev >/dev/null 2>&1
     apt-get install -y libdb4.8-dev libdb4.8++-dev >/dev/null 2>&1
+    apt-get install -y libssl-dev=1.0.2g-1ubuntu4.13 openssl=1.0.2g-1ubuntu4.13 >/dev/null 2>&1
     cd ./mero-1.0.1
     ./autogen.sh >/dev/null 2>&1
-    ./configure --disable-tests --disable-gui-tests >/dev/null 2>&1
+    ./configure --disable-tests --disable-gui-tests --with-libressl >/dev/null 2>&1
 
     make >/dev/null 2>&1
     if [ "$?" -gt "0" ];

@@ -30,7 +30,7 @@ echo -e "${GREEN}Masternode NODE FOLDER:${NC} ${COIN_FOLDER}"
 echo -e "${GREEN}Masternode NODE DATA FOLDER:${NC} ${COIN_FOLDER_DATA}"
 
 
-crontab -l | grep -v '$COIN_FOLDER/sentinel' | crontab -
+crontab -l | grep -v "$COIN_FOLDER/sentinel" | crontab -
 
 systemctl stop $COIN_SERVICE
 systemctl disable $COIN_SERVICE

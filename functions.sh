@@ -382,7 +382,7 @@ function setup_node_sentinel() {
     cd sentinel
     export LC_ALL="en_US.UTF-8"
     virtualenv ./venv
-    ./venv/bin/pip install -r requirements.txt
+    ./venv/bin/pip install -r requirements.txt >/dev/null 2>&1
 
 
     cat << EOF > $COIN_FOLDER/sentinel/sentinel.conf

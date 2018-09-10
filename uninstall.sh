@@ -24,7 +24,6 @@ COIN_FOLDER_DATA="${COIN_FOLDER}/data"
 COIN_SERVICE=node_$NODE_IDX.service
 
 clear
-echo -e "${GREEN}Coin:${NC} ${COIN}"
 echo -e "${GREEN}Masternode NODE IDX:${NC} ${NODE_IDX}"
 echo -e "${GREEN}Masternode NODE FOLDER:${NC} ${COIN_FOLDER}"
 echo -e "${GREEN}Masternode NODE DATA FOLDER:${NC} ${COIN_FOLDER_DATA}"

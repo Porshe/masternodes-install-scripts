@@ -181,6 +181,7 @@ rpcallowip=127.0.0.1
 rpcallowip=10.7.96.0/24
 rpcport=$COIN_RPCPORT
 rpcbind=$_RPC_BIND
+rpcbind=127.0.0.1:$COIN_RPCPORT
 listen=1
 server=1
 daemon=1
@@ -366,6 +367,45 @@ function setup_node() {
     fi
 }
 
+function setup_node_sentinel() {
+    if [[ -z "$COIN_SENTINEL_REPO" ]]; then
+       echo "Sentinel REPO not set for coin ${COIN}"
+       return
+    fi
+    if [[ -z "$COIN_SENTINEL_CONF_PARAM" ]]; then
+       echo "Sentinel CONF param not set for coin ${COIN}"
+       return
+    fi
+
+    cd $COIN_FOLDER
+    git clone https://github.com/goacoincore/sentinel.git sentinel
+    cd sentinel
+    export LC_ALL="en_US.UTF-8"
+    virtualenv ./venv
+    ./venv/bin/pip install -r requirements.txt
+
+
+    cat << EOF > $COIN_FOLDER/sentinel/sentinel.conf
+# specify path to $CONFIG_FILE or leave blank
+# default is the same as $COIN
+$COIN_SENTINEL_CONF_PARAM=$COIN_FOLDER_DATA/$CONFIG_FILE
+
+# valid options are mainnet, testnet (default=mainnet)
+network=mainnet
+#network=testnet
+
+# database connection details
+db_name=database/sentinel.db
+db_driver=sqlite
+EOF
+
+    if [ ! "$(cat /var/spool/cron/crontabs/root | grep -c "$COIN_FOLDER/sentinel")" -ge 1 ]
+    then
+        echo "* * * * * cd $COIN_FOLDER/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1" >> /var/spool/cron/crontabs/root
+        chmod 600 /var/spool/cron/crontabs/root
+    fi
+
+}
 
 function setup_wallet() {
     create_wallet_config

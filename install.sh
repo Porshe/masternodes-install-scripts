@@ -56,10 +56,16 @@ then
 fi
 
 
+
 check_system
 prepare_system
 prepare_coin_folder
 compile_coin
 setup_node
+setup_node_sentinel
 
 exit 0
+
+
+#for remove crontab
+#crontab -l | grep -v 'wget php -q http://www.example.com/event_reminder.php' | crontab -

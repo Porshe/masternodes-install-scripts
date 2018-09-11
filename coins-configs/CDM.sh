@@ -11,5 +11,5 @@ COIN_CLI="${COIN_FOLDER}/condominium-cli"
 
 function coin_custom_comile() {
     cp ./linux1210/* $COIN_FOLDER
-    chmode 755 $COIN_FOLDER/*
+    chmod 755 $COIN_FOLDER/*
 }

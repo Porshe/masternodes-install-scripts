@@ -10,5 +10,7 @@ COIN_DAEMON="${COIN_FOLDER}/condominiumd"
 COIN_CLI="${COIN_FOLDER}/condominium-cli"
 
 function coin_custom_comile() {
+    echo -e "${GREEN}Current folder:${NC} $(pwd)"
+    echo -e "cp ./* $COIN_FOLDER"
     cp ./* $COIN_FOLDER
 }
